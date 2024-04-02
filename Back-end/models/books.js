@@ -1,15 +1,15 @@
 const mongoose = require('mongoose');
 
 const bookShema = mongoose.Schema({
-    userId: {type: String},
-    title: {type: String},
-    author:{type: String},
-    imageuRL:{type: String},
-    year:{type: Number},
-    genre:{type: String},
+    userId: {type: String, required: true},
+    title: {type: String,required: true},
+    author:{type: String,required: true},
+    imageUrl:{type: String,required: true},
+    year:{type: Number,required: true},
+    genre:{type: String,required: true},
     ratings:[{
-        userId:{type: String},
-        grade:{type: Number}
+        userId:{type: String,required: true},
+        grade:{type: Number,required: true}
     }],
     averageRating: {type:Number}
 })
