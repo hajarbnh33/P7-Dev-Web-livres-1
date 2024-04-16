@@ -8,13 +8,12 @@ exports.createBooks = (req,res,next)=>{
     delete bookObject._userId;//Supprime la propriété _userid de l'objet du livre, si elle existe.
     const book = new Books ({//Crée une nouvelle instance du modèle de livre avec les détails du livre fournis dans bookObject. L'ID de l'utilisateur et l'URL de l'image sont également ajoutés à l'objet du livre.
         ...bookObject,
-        userId: req.auth.userId,
+        userId: req.user.id,
         imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
-    });
-    console.log(book, bookObject, {...bookObject,userId:999})
+    });         
     book.save()//Enregistre le nouveau livre dans la base de données. 
     .then(() => { res.status(201).json({message: 'Livre enregistré !'})})
-    .catch(error => { res.status(400).json( { error })})
+    .catch(error => { res.status(400).json( { error })})    
 }
 
 //récupérer tous les livres
@@ -59,7 +58,7 @@ exports.getModifyBooks = (req, res, next)=>{
     delete bookObject._userId //Cette ligne supprime la clé _userId de l'objet bookObject
     Books.findOne({_id: req.params.id})//Cette ligne recherche le livre dans la base de données en utilisant son ID. 
         .then((book)=>{
-            if(book.userId != req.auth.userId){
+            if(book.userId != req.user.id){
                 res.status(403).JSON({message: '403: unauthorized request'})
             }else{
                 Books.updateOne({_id:req.params.id}, {...bookObject,_id:req.params.id})//Cette ligne met à jour le livre dans la base de données. Elle utilise updateOne pour trouver le livre par son ID (req.params.id) et le mettre à jour avec les nouvelles données fournies dans bookObject
@@ -75,7 +74,7 @@ exports.getModifyBooks = (req, res, next)=>{
 exports.deleteBooks = (req, res,next) => {
     Books.findOne({ _id: req.params.id}) //Cette ligne recherche le livre dans la base de données en utilisant son ID
         .then(book => {
-            if (book.userId != req.auth.userId) { //Cette ligne vérifie si l'ID de l'utilisateur qui a créé le livre (book.userId) est différent de l'ID de l'utilisateur authentifié (req.auth.userId).
+            if (book.userId != req.user.id) { //Cette ligne vérifie si l'ID de l'utilisateur qui a créé le livre (book.userId) est différent de l'ID de l'utilisateur authentifié (req.auth.userId).
                 res.status(401).json({message: 'Not authorized'});
             } else {
                 const filename = book.imageUrl.split('/images/')[1];//Cette ligne extrait le nom du fichier image à partir de l'URL de l'image du livre.
@@ -91,5 +90,50 @@ exports.deleteBooks = (req, res,next) => {
         });
  };
 
+// Notation du livre
+ exports.rateBook = async (req, res) => {
+    try {
+        const { userId, rating } = req.body; // Extrait les propriétés userId et rating de l'objet req.body, qui contient les données envoyées dans le corps de la requête HTTP
+        const bookId = req.params.id;// Extrait l'ID du livre à partir des paramètres de la requête. 
+    
+        // Vérifie si la note est valide (entre 0 et 5)
+        if (rating < 0 || rating > 5) { //Vérifie si la note est valide. Si la note est en dehors de la plage de 0 à 5, une réponse d'erreur est renvoyée.
+            return res.status(400).json({ error: "La note doit être comprise entre 0 et 5." });
+        }
 
-//POST
+        // Recherchez le livre dans la base de données
+        const book = await Books.findById(bookId);//Recherche le livre correspondant à l'ID dans la base de données en utilisant la méthode findById fournie par Mongoose
+        if (!book) {// Vérifie si le livre n'a pas été trouvé dans la base de données. 
+            return res.status(404).json({ error: "Livre non trouvé." });
+        }
+
+        // Vérifiez si l'utilisateur est authentifié
+        if (!userId) { //Vérifie si l'ID de l'utilisateur n'est pas fourni. 
+            return res.status(401).json({ error});
+        }
+
+        // Vérifiez si l'utilisateur a déjà noté ce livre
+        const existRating = book.ratings.find(rating => rating.userId === userId);
+        if (existRating) {
+            return res.status(400).json({ message: "Vous avez déjà noté ce livre." });
+        }
+
+        // Ajoutez la note à la liste des notes du livre
+        book.ratings.push({ userId, grade: rating });//Ajoute la nouvelle note dans le tableau ratings du livre avec l'ID de l'utilisateur et la note fournie
+
+        // Mettez à jour la note moyenne "averageRating"
+        const totalRatings = book.ratings.length;//Calcule le nombre total de notes pour ce livre.
+        const sumRatings = book.ratings.reduce((acc, rating) => acc + rating.grade, 0);//Calcule la somme des notes pour ce livre en utilisant la méthode reduce pour additionner toutes les notes.
+        book.averageRating = (sumRatings / totalRatings).toFixed(2); //Calcule la nouvelle moyenne des notes pour ce livre en divisant la somme des notes par le nombre total de notes, puis en l'arrondissant à 2 décimales.
+
+        // Enregistrez les modifications dans la base de données
+        await book.save();
+
+        // Renvoyez le livre mis à jour en réponse
+        res.status(200).json(book);
+    } catch (error) {
+        // Gérez les erreurs
+        console.error(error);
+        res.status(500).json({ error});
+    }
+};

@@ -1,20 +1,8 @@
 const multer = require('multer');
 
-const MIME_TYPES ={
-    'image/jpg':'jpg',
-    'image/jpeg':'jpg',
-    'image/png':'png'
-}
+const storage = multer.memoryStorage(); // stockage en mémoire pour stocker les fichiers téléchargés temporairement en utilisant 
 
-const storage = multer.diskStorage({
-    destination:(req,file,callback)=>{
-        callback(null, 'images')
-    },
-    filename:(req,file,callback)=>{
-        const name = file.originalname.split(' ').join('_')
-        const extension = MIME_TYPES[file.mimetype]
-        callback(null,name + Date.now() + '.' + extension)
-    }
-})
+const upload = multer({ storage: storage }).single('image');//pour indiquer qu'un seul fichier avec le nom de champ "image" sera téléchargé à la fois.
 
-module.exports = multer({storage: storage}).single('image')
+module.exports = upload;
+
