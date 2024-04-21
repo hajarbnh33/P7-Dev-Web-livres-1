@@ -10,7 +10,7 @@ const MIME_TYPES = {
 
 module.exports = (req, res, next) => {
     if (!req.file || !req.file.buffer) { //Vérifie si req.file est défini et contient des données. 
-        return res.status(400).json({ error: 'Aucun fichier.' });
+        return next()
     }
 
     const extension = MIME_TYPES[req.file.mimetype];//Obtient l'extension de fichier correspondant au type MIME du fichier téléchargé à partir de req.file.mimetype.

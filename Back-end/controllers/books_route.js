@@ -50,11 +50,10 @@ exports.getBestBooks = (req,res,next) =>{ //gère la récupération des trois li
 
 //mise à jours du livre
 exports.getModifyBooks = (req, res, next)=>{
-    const bookObject = req.file ? {//Cette ligne crée un objet bookObject qui contiendra les détails du livre à modifier. 
+    const bookObject = req.file ? {//Cette ligne crée un objet bookObject qui contiendra les détails du livre à modifier.
         ...JSON.parse(req.body.book),
         imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`// l'objet bookObject est initialisé avec les données du livre à partir de req.body, et l'URL de l'image est construite à partir des informations de la requête
     } :{ ...req.body}
-
     delete bookObject._userId //Cette ligne supprime la clé _userId de l'objet bookObject
     Books.findOne({_id: req.params.id})//Cette ligne recherche le livre dans la base de données en utilisant son ID. 
         .then((book)=>{
