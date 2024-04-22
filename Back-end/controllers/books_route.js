@@ -92,17 +92,17 @@ exports.deleteBooks = (req, res,next) => {
 // Notation du livre
  exports.rateBook = async (req, res) => {
     try {
-        const { userId, rating } = req.body; // Extrait les propriétés userId et rating de l'objet req.body, qui contient les données envoyées dans le corps de la requête HTTP
-        const bookId = req.params.id;// Extrait l'ID du livre à partir des paramètres de la requête. 
+        const { userId, rating } = req.body; // Extrait les propriétés userId et rating de l'objet req.body
+        const bookId = req.params.id;// Extrait l'ID du livre 
     
         // Vérifie si la note est valide (entre 0 et 5)
-        if (rating < 0 || rating > 5) { //Vérifie si la note est valide. Si la note est en dehors de la plage de 0 à 5, une réponse d'erreur est renvoyée.
+        if (rating < 0 || rating > 5) { 
             return res.status(400).json({ error: "La note doit être comprise entre 0 et 5." });
         }
 
         // Recherchez le livre dans la base de données
-        const book = await Books.findById(bookId);//Recherche le livre correspondant à l'ID dans la base de données en utilisant la méthode findById fournie par Mongoose
-        if (!book) {// Vérifie si le livre n'a pas été trouvé dans la base de données. 
+        const book = await Books.findById(bookId);//Recherche le livre correspondant à l'ID dans la base de données en utilisant la méthode findById 
+        if (!book) {
             return res.status(404).json({ error: "Livre non trouvé." });
         }
 
@@ -120,10 +120,10 @@ exports.deleteBooks = (req, res,next) => {
         // Ajoutez la note à la liste des notes du livre
         book.ratings.push({ userId, grade: rating });//Ajoute la nouvelle note dans le tableau ratings du livre avec l'ID de l'utilisateur et la note fournie
 
-        // Mettez à jour la note moyenne "averageRating"
+        // mise à jour la note moyenne "averageRating"
         const totalRatings = book.ratings.length;//Calcule le nombre total de notes pour ce livre.
-        const sumRatings = book.ratings.reduce((acc, rating) => acc + rating.grade, 0);//Calcule la somme des notes pour ce livre en utilisant la méthode reduce pour additionner toutes les notes.
-        book.averageRating = (sumRatings / totalRatings).toFixed(2); //Calcule la nouvelle moyenne des notes pour ce livre en divisant la somme des notes par le nombre total de notes, puis en l'arrondissant à 2 décimales.
+        const sumRatings = book.ratings.reduce((acc, rating) => acc + rating.grade, 0);//Calcule la somme des notes: la méthode reduce pour additionner toutes les notes.
+        book.averageRating = (sumRatings / totalRatings).toFixed(2); //2 décimales.
 
         // Enregistrez les modifications dans la base de données
         await book.save();

@@ -18,8 +18,8 @@ module.exports = (req, res, next) => {
         return res.status(400).json({ error: 'Format non pris en charge' });
     }
 
-    const timestamp = Date.now();// retourne le nombre de millisecondes écoulées depuis le 1er janvier 1970 00:00:00 UTC jusqu'à la date actuelle. Cela permet d'obtenir un timestamp unique à chaque fois que cette ligne est exécutée.
-    const fileName = `image_${timestamp}.webp`;// Le nom est composé de la chaîne "image_", suivie du timestamp généré précédemment, puis d'un point (.) et de l'extension du fichier récupérée à partir du type MIME de l'image téléchargée.
+    const timestamp = Date.now();//Cela permet d'obtenir un timestamp unique à chaque fois que cette ligne est exécutée.
+    const fileName = `image_${timestamp}.webp`;
 
     sharp(req.file.buffer)//un objet Sharp à partir du buffer de l'image téléchargée
         .resize(800, 800)
@@ -29,12 +29,12 @@ module.exports = (req, res, next) => {
                 return res.status(500).json({ error: 'Erreur traitement image.' });
             }
             
-            // Écrivez le buffer dans le fichier sur le serveur, dans le répertoire images. Une fois l'écriture terminée, appelle next() pour passer au middleware suivant.
+            //le buffer écrit dans le fichier sur le serveur, dans le répertoire images.
             fs.writeFile(path.join(__dirname, '..', 'images', fileName), buffer, err => {
                 if (err) {
                     return res.status(500).json({ error: 'Erreur sauvegarde image.' });
                 }
-                req.file.filename = fileName;
+                req.file.filename = fileName;//nom du fichier attribué à filename
                 next();
             });
         });

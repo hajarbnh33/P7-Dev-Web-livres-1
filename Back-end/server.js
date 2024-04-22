@@ -1,5 +1,5 @@
 const http = require('http'); //Cette ligne importe le module HTTP Node.js, qui est utilisé pour créer un serveur HTTP.
-const app = require('./app');//importe le module app à partir du fichier app.js local. Ce fichier doit contenir la configuration et la logique de votre application Express
+const app = require('./app');
 
 const normalizePort = val => {
   const port = parseInt(val, 10);

@@ -1,10 +1,10 @@
 const bcrypt = require('bcrypt');
-const User = require('../models/user');//Importe le modèle User défini dans le fichier user.js du répertoire models, qui représente la structure des données des utilisateurs dans la base de données.
-const jwt = require('jsonwebtoken')// générer des jetons d'authentification
+const User = require('../models/user');
+const jwt = require('jsonwebtoken')
 
 //inscription du nouvel utilisateur
 exports.signup= (req,res,next) =>{
-    bcrypt.hash(req.body.password, 10) //Utilise la fonction hash de bcrypt pour hacher le mot de passe || 10 spécifie le nombre de tours pour le hachage, ce qui détermine le niveau de sécurité.
+    bcrypt.hash(req.body.password, 10) //Utilise la fonction hash de bcrypt pour hacher le mot de passe || 10 spécifie le nombre de tours pour le hachage
     .then(hash =>{
         const user = new User({ //Crée une nouvelle instance de modèle User avec l'e-mail fourni dans le corps de la requête et le mot de passe haché.
             email:req.body.email,
