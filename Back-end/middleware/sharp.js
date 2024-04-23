@@ -29,12 +29,12 @@ module.exports = (req, res, next) => {
                 return res.status(500).json({ error: 'Erreur traitement image.' });
             }
             
-            //le buffer écrit dans le fichier sur le serveur, dans le répertoire images.
+            //le buffer écrit dans un fichier sur le serveur, dans le répertoire images.
             fs.writeFile(path.join(__dirname, '..', 'images', fileName), buffer, err => {
                 if (err) {
                     return res.status(500).json({ error: 'Erreur sauvegarde image.' });
                 }
-                req.file.filename = fileName;//nom du fichier attribué à filename
+                req.file.filename = fileName;//nom du fichier attribué
                 next();
             });
         });

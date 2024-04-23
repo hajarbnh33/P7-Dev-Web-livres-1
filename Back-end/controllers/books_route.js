@@ -4,8 +4,8 @@ const fs = require('fs');
 //créer un nouveau livre 
 exports.createBooks = (req,res,next)=>{
     const bookObject = JSON.parse(req.body.book);//Analyse le corps de la requête (req.body.book) pour obtenir les détails du livre sous forme d'objet JavaScript.
-    delete bookObject._id;//Supprime la propriété _id de l'objet du livre, si elle existe.
-    delete bookObject._userId;//Supprime la propriété _userid de l'objet du livre, si elle existe.
+    delete bookObject._id;
+    delete bookObject._userId;
     const book = new Books ({//Crée une nouvelle instance du modèle de livre avec les détails du livre fournis dans bookObject. L'ID de l'utilisateur et l'URL de l'image sont également ajoutés à l'objet du livre.
         ...bookObject,
         userId: req.user.id,
@@ -92,9 +92,10 @@ exports.deleteBooks = (req, res,next) => {
 // Notation du livre
  exports.rateBook = async (req, res) => {
     try {
-        const { userId, rating } = req.body; // Extrait les propriétés userId et rating de l'objet req.body
+        const userId = req.user.id;
+        const {rating } = req.body; // Extrait les propriétés rating de l'objet req.body
         const bookId = req.params.id;// Extrait l'ID du livre 
-    
+        console.log(userId)
         // Vérifie si la note est valide (entre 0 et 5)
         if (rating < 0 || rating > 5) { 
             return res.status(400).json({ error: "La note doit être comprise entre 0 et 5." });
